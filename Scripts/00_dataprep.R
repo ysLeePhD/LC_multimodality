@@ -10,7 +10,7 @@ data01 <- data00[, c(1, 114:120, 123:138, 599:643, 799, 420, 426, 468, 181:334, 
 #colnames(data01)
 
 
-# Sociodemographc/economic characteristics  
+#A. Sociodemographc/economic characteristics  
 
 table(data01$K11_gender)
 data01$Gender <- factor(data01$K11_gender, labels=c("male", "female", "trans", "decline"), ordered=TRUE)
@@ -40,7 +40,6 @@ data01$Education <- factor(data01$K19_education, labels=c(
 table(data01$Education)
 
 
-
 ## Study/work status 
 data01$WorkHours <- ifelse(is.na(data01$D7_WorkHours)==TRUE, 0, data01$D7_WorkHours)
 table(data01$WorkHours)
@@ -53,7 +52,7 @@ data01$Employment <- factor(data01$D4_Employment, labels=c("Full-time", "Part-ti
                                                               "Not a worker"), ordered=TRUE)
 table(data01$Employment)
 
-#4. full-time students - reference category
+## Study/work status 4. full-time students - reference category
 # https://www.irs.gov/affordable-care-act/employers/identifying-full-time-employees
 # For purposes of the employer shared responsibility provisions, a full-time employee is, for a calendar month, 
 # an employee employed on average at least 30 hours of service per week, or 130 hours of service per month.  
@@ -61,19 +60,19 @@ data01$StudyWorkStatus <- ifelse(data01$D1_Student==1, 3, data01$StudyWorkStatus
 data01$StudyWorkStatus <- ifelse(data01$D1_Student==1 & data01$D4_Employment==1, 1, data01$StudyWorkStatus) 
 data01$StudyWorkStatus <- ifelse(data01$D1_Student==1 & data01$D4_Employment==3 & 
                                  data01$WorkHours>=30, 1, data01$StudyWorkStatus)   
-#1. full-time workers
+## Study/work status 1. full-time workers
 data01$StudyWorkStatus <- ifelse(data01$D4_Employment==1, 1, data01$StudyWorkStatus) 
 data01$StudyWorkStatus <- ifelse(data01$D4_Employment==3 & 
                                  data01$WorkHours>=30, 1, data01$StudyWorkStatus) 
-#3. part-time workers
+## Study/work status 3. part-time workers
 data01$StudyWorkStatus <- ifelse(data01$D4_Employment==2 & data01$D1_Student>1, 2, data01$StudyWorkStatus) 
 data01$StudyWorkStatus <- ifelse(data01$D4_Employment==3 & data01$D1_Student>1 & 
                                  data01$WorkHours<30, 2, data01$StudyWorkStatus) 
 
-#2. only part-time students / no work 
+## Study/work status 2. only part-time students / no work 
 data01$StudyWorkStatus <- ifelse(data01$D1_Student==2 & data01$D4_Employment>3, 4, data01$StudyWorkStatus)
 
-#5. no work & no study - drop from the sample  
+## Study/work status 5. no work & no study - drop from the sample  
 data01$StudyWorkStatus <- ifelse(data01$D1_Student>2 & data01$D4_Employment>3, 5, data01$StudyWorkStatus)
 
 data01$StudyWorkStatus <- factor(data01$StudyWorkStatus, labels=c("Full-time work", "Part-time work", 
@@ -97,7 +96,15 @@ data01$hhincome <- factor(data01$K17_hhincome, labels=c("Prefer not to answer", 
                                                         "$100,001 to $120,000", "$120,001 to $140,000", "$140,001 to $160,000", 
                                                         "More than $160,000"), ordered=TRUE) 
 
-# Travel outcomes  
+#B. Factors & standalone statements 
+
+
+
+#C. BE attributes 
+
+
+
+#D. Travel outcomes (Dependent variables)
 
 data01$license <- factor(data01$H1_car, labels=c("No license", "With a driver's license"), ordered=TRUE)
 data01$ncar <- data01$H4_NumCar
