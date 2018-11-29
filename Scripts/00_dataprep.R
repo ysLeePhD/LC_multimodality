@@ -8,6 +8,8 @@ data00 <- read.csv(file="M:/Millennial_CA/02_raw_data/11_latest_update/GenY_Synt
 data01 <- data00[, c(1, 114:120, 123:138, 599:643, 799, 420, 426, 468, 181:334, 674)]
 #https://www.r-bloggers.com/subsetting-data/
 #colnames(data01)
+data01$PID <- data01[, 1] 
+data01 <- data01[, c(229, 2:228)]
 
 
 #A. Sociodemographc/economic characteristics  
@@ -97,10 +99,18 @@ data01$hhincome <- factor(data01$K17_hhincome, labels=c("Prefer not to answer", 
                                                         "More than $160,000"), ordered=TRUE) 
 
 #B. Factors & standalone statements 
-
+data02 <- data00[, c(1, 842:891)]
+data02$PID <- data02[, 1] 
+data02 <- data02[, c(52, 2:51)]
+colnames(data02)
 
 
 #C. BE attributes 
+geo00 <- read.csv(file="M:/Millennial_CA/03_task/01_geocoding_recheck/Home1975case_xy_region_12132017.csv")
+geo01 <- geo00[c(1:1975), c(1, 2, 6, 10, 17)]
+geo01$Accuracy <- as.integer(geo01[, 2])
+geo01 <- geo01[, c(1, 6, 3:5)]
+
 
 
 
