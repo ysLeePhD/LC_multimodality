@@ -119,41 +119,6 @@ geo01$Accuracy <- as.integer(geo01[, 2])
 geo01 <- geo01[, c(1, 6, 3:5)]
 head(geo01)
 
-install.packages("tidycensus")
-install.packages("tigris")
-install.packages("devtools")
-devtools::install_github("jamgreen/lehdr")
-
-library(tidycensus)
-library(tigris)
-library(lehdr)
-
-#https://cran.r-project.org/web/packages/tidycensus/tidycensus.pdf
-#census_api_key("3b1d8912e33aa2d4c01bf1abc84729cfeb7cd6cd", install = TRUE)
-readRenviron("~/.Renviron") # First time, reload your environment so you can use the key without restarting R.
-Sys.getenv("CENSUS_API_KEY") # You can check it with:
-
-var.acs <- load_variables(2016, "acs5", cache=TRUE)
-View(var.acs)
-
-
-
-# BE factor analysis - references  
-# Yan Song & Garrit-Jan Knaap, Portland metro  
-# https://www.tandfonline.com/doi/pdf/10.1080/13574800601072640?needAccess=true
-# Reid Ewing, sprawl index 
-# https://smartgrowthamerica.org/app/legacy/documents/MeasuringSprawlTechnical.pdf
-# Deborah Salon
-# https://ac.els-cdn.com/S0739885915000529/1-s2.0-S0739885915000529-main.pdf?_tid=bcdf6d1c-81a5-4e90-9969-9bcc8aec81b1&acdnat=1543583216_da1b3e5a9f1d2f6dad3cd165550756fd
-# Brian Talyor
-# http://www.lewis.ucla.edu/wp-content/uploads/sites/2/2015/10/Geography-of-Youth-Travel_Final-Report.pdf?mc_cid=68d255b9a1&mc_eid=c362ec69d8
-# Me, location choice paper 
-
-# previously, three attributes at the Census blockgroup level 
-# Activity intensity - already a factor score 
-# Balance of various land uses - already a factor score 
-# where is the factor anlaysis solution? 
-# Transit service quality (alltransit)
 
  
 
