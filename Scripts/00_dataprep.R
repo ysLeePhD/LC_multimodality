@@ -5,13 +5,13 @@ library(foreign)
 
 data00 <- read.csv(file="M:/Millennial_CA/02_raw_data/11_latest_update/GenY_Syntax6_Step1_temp.csv")
 #colnames(data00)
-data01 <- data00[, c(1, 114:120, 123:138, 599:643, 799, 420, 426, 468, 181:334, 674:675)]
+data01 <- data00[, c(1, 114:120, 123:138, 599:643, 799, 801, 420, 426, 468, 181:334, 674:675)]
 #https://www.r-bloggers.com/subsetting-data/
 #colnames(data01)
 data01$PID <- data01[, 1] 
-data01 <- data01[, c(230, 2:229)]
+data01 <- data01[, c(231, 2:230)]
 
-
+colnames(data00)
 
 
 #A. Sociodemographc/economic characteristics  
@@ -99,6 +99,9 @@ data01$hhincome <- factor(data01$K17_hhincome, labels=c("Prefer not to answer", 
                                                         "$40,001 to $60,000", "$60,001 to $80,000", "$80,001 to $100,000", 
                                                         "$100,001 to $120,000", "$120,001 to $140,000", "$140,001 to $160,000", 
                                                         "More than $160,000"), ordered=TRUE) 
+
+data01 <- data01[, c(1, 231:233, 240:243, 245, 244, 237, 235, 246, 70, 71)]
+colnames(data01)
 
 
 
@@ -188,15 +191,31 @@ data03$commute_pt <- round(modefreq(data03$F6school_Shuttle) + modefreq(data03$F
   modefreq(data03$F6work_Shuttle) + modefreq(data03$F6work_Bus) + modefreq(data03$F6work_LR) + modefreq(data03$F6work_Train), digits=0)
 data03$commute_bikewalk <- round(modefreq(data03$F6school_Bike) + modefreq(data03$F6school_Skateboard) + modefreq(data03$F6school_Walk) + 
   modefreq(data03$F6work_Bike) + modefreq(data03$F6work_Skateboard) + modefreq(data03$F6work_Walk), digits=0)
-
+data03$commute_total <- round(
+  modefreq(data03$F6school_Drivealone) + modefreq(data03$F6school_Moto) + modefreq(data03$F6school_CarpoolD)+  
+  modefreq(data03$F6work_Drivealone) + modefreq(data03$F6work_Moto) + modefreq(data03$F6work_CarpoolD)+
+  modefreq(data03$F6school_CarpoolP) +  modefreq(data03$F6school_Uber) + modefreq(data03$F6school_Taxi)+ 
+  modefreq(data03$F6work_CarpoolP) + modefreq(data03$F6work_Uber) + modefreq(data03$F6work_Taxi)+
+  modefreq(data03$F6school_Shuttle) + modefreq(data03$F6school_Bus) + modefreq(data03$F6school_LR) + modefreq(data03$F6school_Train)+ 
+  modefreq(data03$F6work_Shuttle) + modefreq(data03$F6work_Bus) + modefreq(data03$F6work_LR) + modefreq(data03$F6work_Train)+
+  modefreq(data03$F6school_Bike) + modefreq(data03$F6school_Skateboard) + modefreq(data03$F6school_Walk)+ 
+  modefreq(data03$F6work_Bike) + modefreq(data03$F6work_Skateboard) + modefreq(data03$F6work_Walk), digits=0)
+  
 data03$leisure_drv <- round(modefreq(data03$F14leisure_Drivealone) + modefreq(data03$F14leisure_Moto) + modefreq(data03$F14leisure_CarpoolD), digits=0) 
 data03$leisure_carpassenger <- round(modefreq(data03$F14leisure_CarpoolP) + modefreq(data03$F14leisure_Taxi), digits=0)
 data03$leisure_pt <- round(modefreq(data03$F14leisure_Bus) + modefreq(data03$F14leisure_LR) + modefreq(data03$F14leisure_Train), digits=0)
 data03$leisure_bikewalk <- round(modefreq(data03$F14leisure_Bike) + modefreq(data03$F14leisure_Skateboard) + modefreq(data03$F14leisure_Walk), digits=0) 
 data03$leisure_emerging <- round(modefreq(data03$F14leisure_Uber) + modefreq(data03$F14leisure_Carsharing), digits=0)
- 
+data03$leisure_total <- round(
+  modefreq(data03$F14leisure_Drivealone) + modefreq(data03$F14leisure_Moto) + modefreq(data03$F14leisure_CarpoolD)+
+  modefreq(data03$F14leisure_CarpoolP) + modefreq(data03$F14leisure_Taxi)+
+  modefreq(data03$F14leisure_Bus) + modefreq(data03$F14leisure_LR) + modefreq(data03$F14leisure_Train)+
+  modefreq(data03$F14leisure_Bike) + modefreq(data03$F14leisure_Skateboard) + modefreq(data03$F14leisure_Walk)+
+  modefreq(data03$F14leisure_Uber) + modefreq(data03$F14leisure_Carsharing), digits=0) 
+
 data03$PID <- data03[, c(1)]
-data03 <- data03[, c(298, 277:297, 4:6)]
+data03 <- data03[, c(300, 277:299, 4:6)]
+colnames(data03)
 
 
 
@@ -211,23 +230,24 @@ data03 <- data03[, c(298, 277:297, 4:6)]
 # head(geo01)
 
 # Neighborhood type by Deborah
-data04 <- data00[, c(1, 670)]
+data04 <- data00[, c(1, 670, 675)]
 data04$PID <- data04[, c(1)]
 data04$NHtype <- factor(data04$NHtype5_edited, labels=c("Central city", "Urban", "Suburban", "Rural-In-Urban", "Rural"), ordered=TRUE)
-data04 <- data04[, 3:4]
+data04 <- data04[, c(4, 5, 3)]
+colnames(data04)
 
 # two LU factors: Activity intensity & Balance of various land uses 
 geo10 <- read.csv("M:/Millennial_CA/21_RC_LCCM/03_data_process/01_SPSS/Factors_BE2.csv")
 geo10$GEOID10 <- geo10[, 1]
 geo10 <- geo10[, c(9, 2:3)]
-head(geo10)
+colnames(geo10)
 
 # Alltransit measure: Transit Connectivity Index (0-100)
 tr00 <- read.csv("M:/Millennial_CA/03_task/04_Alltransit/TRscore_full.csv")
 tr00$PID <- tr00[, 1]
 tr00$TransitIndex <- as.numeric(as.character(tr00$TQ2))
 tr01 <- tr00[, c("PID", "TransitIndex")]
-
+colnames(tr01)
 
 
 
