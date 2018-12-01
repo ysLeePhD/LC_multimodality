@@ -123,7 +123,7 @@ colnames(data02)
  
 
 #D. Travel outcomes (Dependent variables)
-data03 <- data00[, c(1, 181:346, 420:479, 599:642)]
+data03 <- data00[, c(1, 137:138, 181:346, 420:479, 599:642)]
 data03$license <- factor(data03$H1_car, labels=c("No license", "With a driver's license"), ordered=TRUE)
 data03$ncar <- data03$H4_NumCar
 data03$carpdr <- ifelse(data03$K15_numdrivers>0, data03$H4_NumCar/data03$K15_numdrivers, 0)
@@ -133,6 +133,30 @@ data03$nadlt <- ifelse(data03$nadlt==0, 1, data03$nadlt)
 data03$carpadlt <- data03$H4_NumCar/data03$nadlt
 data03$VMDpw <- ifelse(data03$H11car_VMT>=0, data03$H11car_VMT, 0) 
 data03$lnVMDpw <- log(data03$VMDpw+1) 
+
+data03$wPTpass <- ifelse(data03$H14_PTpass>1, 1, 0)
+data03$pctCarAvail <- data03$H5_car_avail
+data03$pctCarAvail <- ifelse(is.na(data03$H5_car_avail)==TRUE & data03$H4_NumCar==0, 0, data03$pctCarAvail) 
+
+data03$F2_dayswork  <- ifelse(is.na(data03$F2_dayswork) ==TRUE, 0, data03$F2_dayswork )
+data03$F2_dayswork  <- ifelse(data03$F2_dayswork<0,             NA, data03$F2_dayswork) # one case missing for commute days for work 
+data03$F2_dayschool <- ifelse(is.na(data03$F2_dayschool)==TRUE, 0, data03$F2_dayschool)
+data03$cdaypw <- ifelse(data03$F2_dayswork>=data03$F2_dayschool, data03$F2_dayswork, data03$F2_dayschool)
+
+data03$CommuteDist <- NA
+data03$CommuteDist <- ifelse(data03$cdaypw==0, 0, data03$CommuteDist) # non-commuters 
+data03$CommuteDist <- ifelse(data03$cdaypw>0 & data03$F2_dayswork>=data03$F2_dayschool, data03$F3work_comDist,   data03$CommuteDist)
+data03$CommuteDist <- ifelse(data03$cdaypw>0 & data03$F2_dayswork< data03$F2_dayschool, data03$F3school_comdist, data03$CommuteDist)
+summary(data03$CommuteDist) # 105 cases missing (they commute regularly, but they did not report the distance)
+
+telecommuting frequency
+data03$TeleFreq <- 0 
+data03$TeleFreq <- ifelse(data03$D11_TelecommuteFreq==1, 0, data03$TeleFreq)
+data03$TeleFreq <- 0 
+data03$TeleFreq <- 0 
+
+table(data03$D10_Telecommute) # 1-No, 2-Not sure, 3-Yes 
+table(data03$D11_TelecommuteFreq) # 
 
 modefreq <- function(x){
   a <- NA 
@@ -172,4 +196,6 @@ data03$leisure_pt <- round(modefreq(data03$F14leisure_Bus) + modefreq(data03$F14
 data03$leisure_bikewalk <- round(modefreq(data03$F14leisure_Bike) + modefreq(data03$F14leisure_Skateboard) + modefreq(data03$F14leisure_Walk), digits=0) 
 data03$leisure_emerging <- round(modefreq(data03$F14leisure_Uber) + modefreq(data03$F14leisure_Carsharing), digits=0)
  
-# commute/work-related variables need be processed. 
+
+
+
