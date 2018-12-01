@@ -5,11 +5,11 @@ library(foreign)
 
 data00 <- read.csv(file="M:/Millennial_CA/02_raw_data/11_latest_update/GenY_Syntax6_Step1_temp.csv")
 #colnames(data00)
-data01 <- data00[, c(1, 114:120, 123:138, 599:643, 799, 420, 426, 468, 181:334, 674)]
+data01 <- data00[, c(1, 114:120, 123:138, 599:643, 799, 420, 426, 468, 181:334, 674:675)]
 #https://www.r-bloggers.com/subsetting-data/
 #colnames(data01)
 data01$PID <- data01[, 1] 
-data01 <- data01[, c(229, 2:228)]
+data01 <- data01[, c(230, 2:229)]
 
 
 
@@ -110,20 +110,10 @@ data02 <- data02[, c(52, 2:51)]
 colnames(data02)
 
 
-
-
-#C. BE attributes: Use as it is. 
-# geo00 <- read.csv(file="M:/Millennial_CA/03_task/01_geocoding_recheck/Home1975case_xy_region_12132017.csv")
-# geo01 <- geo00[c(1:1975), c(1, 2, 6, 10, 17)]
-# geo01$Accuracy <- as.integer(geo01[, 2])
-# geo01 <- geo01[, c(1, 6, 3:5)]
-# head(geo01)
-
-
  
 
-#D. Travel outcomes (Dependent variables)
-data03 <- data00[, c(1, 137:138, 181:346, 420:479, 599:642)]
+#C. Travel outcomes (Dependent variables)
+data03 <- data00[, c(1, 137:139, 153, 167, 181:346, 420:479, 599:642)]
 data03$license <- factor(data03$H1_car, labels=c("No license", "With a driver's license"), ordered=TRUE)
 data03$ncar <- data03$H4_NumCar
 data03$carpdr <- ifelse(data03$K15_numdrivers>0, data03$H4_NumCar/data03$K15_numdrivers, 0)
@@ -149,14 +139,24 @@ data03$CommuteDist <- ifelse(data03$cdaypw>0 & data03$F2_dayswork>=data03$F2_day
 data03$CommuteDist <- ifelse(data03$cdaypw>0 & data03$F2_dayswork< data03$F2_dayschool, data03$F3school_comdist, data03$CommuteDist)
 summary(data03$CommuteDist) # 105 cases missing (they commute regularly, but they did not report the distance)
 
-telecommuting frequency
-data03$TeleFreq <- 0 
-data03$TeleFreq <- ifelse(data03$D11_TelecommuteFreq==1, 0, data03$TeleFreq)
-data03$TeleFreq <- 0 
-data03$TeleFreq <- 0 
-
 table(data03$D10_Telecommute) # 1-No, 2-Not sure, 3-Yes 
 table(data03$D11_TelecommuteFreq) # 
+
+data03$TeleFreq <- 0 # no telecommuter (including no commuter)
+data03$TeleFreq <- ifelse(is.na(data03$D11_TelecommuteFreq)==FALSE & data03$D11_TelecommuteFreq==2, 1, data03$TeleFreq) # less than once a week: less than once a month 
+data03$TeleFreq <- ifelse(is.na(data03$D11_TelecommuteFreq)==FALSE & data03$D11_TelecommuteFreq==3, 1, data03$TeleFreq) # less than once a week: 1-3 times a week 
+data03$TeleFreq <- ifelse(is.na(data03$D11_TelecommuteFreq)==FALSE & data03$D11_TelecommuteFreq>3, 2, data03$TeleFreq)  # at least once a week: 1-2, 3-4, & 5 or more times a week 
+table(data03$TeleFreq)
+
+#if D11_TelecommuteFreq=. then telefreq1=1; 
+#if D11_TelecommuteFreq=1 then telefreq1=1; 
+
+#if D11_TelecommuteFreq=2 then telefreq2=1; 
+#if D11_TelecommuteFreq=3 then telefreq2=1; 
+
+#if D11_TelecommuteFreq=4 then telefreq3=1; 
+#if D11_TelecommuteFreq=5 then telefreq3=1; 
+#if D11_TelecommuteFreq=6 then telefreq3=1; 
 
 modefreq <- function(x){
   a <- NA 
@@ -189,13 +189,46 @@ data03$commute_pt <- round(modefreq(data03$F6school_Shuttle) + modefreq(data03$F
 data03$commute_bikewalk <- round(modefreq(data03$F6school_Bike) + modefreq(data03$F6school_Skateboard) + modefreq(data03$F6school_Walk) + 
   modefreq(data03$F6work_Bike) + modefreq(data03$F6work_Skateboard) + modefreq(data03$F6work_Walk), digits=0)
 
-
 data03$leisure_drv <- round(modefreq(data03$F14leisure_Drivealone) + modefreq(data03$F14leisure_Moto) + modefreq(data03$F14leisure_CarpoolD), digits=0) 
 data03$leisure_carpassenger <- round(modefreq(data03$F14leisure_CarpoolP) + modefreq(data03$F14leisure_Taxi), digits=0)
 data03$leisure_pt <- round(modefreq(data03$F14leisure_Bus) + modefreq(data03$F14leisure_LR) + modefreq(data03$F14leisure_Train), digits=0)
 data03$leisure_bikewalk <- round(modefreq(data03$F14leisure_Bike) + modefreq(data03$F14leisure_Skateboard) + modefreq(data03$F14leisure_Walk), digits=0) 
 data03$leisure_emerging <- round(modefreq(data03$F14leisure_Uber) + modefreq(data03$F14leisure_Carsharing), digits=0)
  
+data03$PID <- data03[, c(1)]
+data03 <- data03[, c(298, 277:297, 4:6)]
 
 
 
+
+#D. BE attributes: Use as it is. 
+
+# most uptodate geocodes  
+# geo00 <- read.csv(file="M:/Millennial_CA/03_task/01_geocoding_recheck/Home1975case_xy_region_12132017.csv")
+# geo01 <- geo00[c(1:1975), c(1, 2, 6, 10, 17)]
+# geo01$Accuracy <- as.integer(geo01[, 2])
+# geo01 <- geo01[, c(1, 6, 3:5)]
+# head(geo01)
+
+# Neighborhood type by Deborah
+data04 <- data00[, c(1, 670)]
+data04$PID <- data04[, c(1)]
+data04$NHtype <- factor(data04$NHtype5_edited, labels=c("Central city", "Urban", "Suburban", "Rural-In-Urban", "Rural"), ordered=TRUE)
+data04 <- data04[, 3:4]
+
+# two LU factors: Activity intensity & Balance of various land uses 
+geo10 <- read.csv("M:/Millennial_CA/21_RC_LCCM/03_data_process/01_SPSS/Factors_BE2.csv")
+geo10$GEOID10 <- geo10[, 1]
+geo10 <- geo10[, c(9, 2:3)]
+head(geo10)
+
+# Alltransit measure: Transit Connectivity Index (0-100)
+tr00 <- read.csv("M:/Millennial_CA/03_task/04_Alltransit/TRscore_full.csv")
+tr00$PID <- tr00[, 1]
+tr00$TransitIndex <- as.numeric(as.character(tr00$TQ2))
+tr01 <- tr00[, c("PID", "TransitIndex")]
+
+
+
+
+#E. merge/join 
