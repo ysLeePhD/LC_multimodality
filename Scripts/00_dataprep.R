@@ -11,7 +11,7 @@ data01 <- data00[, c(1, 114:120, 123:138, 599:643, 799, 801, 420, 426, 468, 181:
 data01$PID <- data01[, 1] 
 data01 <- data01[, c(231, 2:230)]
 
-colnames(data00)
+
 
 
 #A. Sociodemographc/economic characteristics  
@@ -230,10 +230,12 @@ colnames(data03)
 # head(geo01)
 
 # Neighborhood type by Deborah
-data04 <- data00[, c(1, 670, 675)]
+#colnames(data00)
+data04 <- data00[, c(1, 668, 670, 675)]
 data04$PID <- data04[, c(1)]
 data04$NHtype <- factor(data04$NHtype5_edited, labels=c("Central city", "Urban", "Suburban", "Rural-In-Urban", "Rural"), ordered=TRUE)
-data04 <- data04[, c(4, 5, 3)]
+data04$Accuracy <- data04$Geocoding_type
+data04 <- data04[, c(5, 6, 7, 4)]
 colnames(data04)
 
 # two LU factors: Activity intensity & Balance of various land uses 
@@ -242,6 +244,9 @@ geo10$GEOID10 <- geo10[, 1]
 geo10 <- geo10[, c(9, 2:3)]
 colnames(geo10)
 
+data04 <- left_join(data04, geo10, by="GEOID10")
+#data04 <- select(data04, -GEOID10)
+
 # Alltransit measure: Transit Connectivity Index (0-100)
 tr00 <- read.csv("M:/Millennial_CA/03_task/04_Alltransit/TRscore_full.csv")
 tr00$PID <- tr00[, 1]
@@ -249,6 +254,36 @@ tr00$TransitIndex <- as.numeric(as.character(tr00$TQ2))
 tr01 <- tr00[, c("PID", "TransitIndex")]
 colnames(tr01)
 
+data04 <- left_join(data04, tr01, by="PID")
+head(data04)
+
+filter(data04, is.na(Activity_intensity)==TRUE) 
+# While two factors are computed at the Census block group level, 
+# some variables are not available at that level, or for 93 cases in the sample.
+# the best way is to use the previous data file for the two factors or the three LU attributes. 
+
+
+#use LU attributes from the previous datafile
+data05 <- read.csv("M:/Millennial_CA/15_MC_multimodality/13_analysis/run06/LCA_commuter1071.csv")
+data05$PID <- data05[, 1]
+colnames(data05)
+data05 <- data05[, c(102, 76, 77, 82:86, 91, 74)]
+head(data05)
+
+
 
 
 #E. merge/join 
+
+# check any duplicate with the same PID for data01~05 
+data05 %>% 
+  group_by(PID) %>% 
+  summarize(count=n()) %>% 
+  filter(count>1)
+
+data11 <- inner_join(data01, data03, by="PID")
+data11 <- inner_join(data11, data02, by="PID")
+data11 <- inner_join(data11, data05, by="PID") 
+# final sample size 1,069 cases - two cases are excluded b/c they are not in the 1975 sample (PID=9365921, 9369844)
+
+write.csv(data11, "M:/Millennial_CA/15_MC_multimodality/33_reMplus/data11.csv")
