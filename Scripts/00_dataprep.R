@@ -148,9 +148,12 @@ colnames(data01s)
 
 
 #B. Factors & standalone statements 
-data02 <- data00[, c(1, 842:891)]
+#colnames(data00)
+data02 <- data00[, c(1, 860:891)]
 data02$PID <- data02[, 1] 
-data02 <- data02[, c(52, 2:51)]
+data02$Zmust_own_car_18F <- data02$Zmust_own_car_reversed_18F*(-1)
+data02$Ztech_embracing_18F <- data02$Ztech_embracing_reversed_18F*(-1)
+data02 <- data02[, c(34, 8, 10, 35, 18, 5, 36, 19, 4, 12, 3, 31, 15, 9, 2, 17, 29)]
 colnames(data02)
 
 
@@ -241,18 +244,40 @@ data03$commute_total <- round(
   modefreq(data03$F6work_Shuttle) + modefreq(data03$F6work_Bus) + modefreq(data03$F6work_LR) + modefreq(data03$F6work_Train)+
   modefreq(data03$F6school_Bike) + modefreq(data03$F6school_Skateboard) + modefreq(data03$F6school_Walk)+ 
   modefreq(data03$F6work_Bike) + modefreq(data03$F6work_Skateboard) + modefreq(data03$F6work_Walk), digits=0)
+
+modefreq2 <- function(x){
+  a <- NA 
+  for (i in 1:length(x)){
+    if (is.na(x[i])==TRUE) {
+      a[i] <- 0
+    } else if (x[i]<2) {
+      a[i] <- 0 
+    } else if (x[i]==2) {
+      a[i] <- 0.5 
+    } else if (x[i]==3) {
+      a[i] <- 2
+    } else if (x[i]==4) {
+      a[i] <- 6
+    } else if (x[i]==5) {
+      a[i] <- 14
+    } else if (x[i]==6) {
+      a[i] <- 20
+    }
+  }
+  return(a) 
+}
   
-data03$leisure_drv <- round(modefreq(data03$F14leisure_Drivealone) + modefreq(data03$F14leisure_Moto) + modefreq(data03$F14leisure_CarpoolD), digits=0) 
-data03$leisure_carpassenger <- round(modefreq(data03$F14leisure_CarpoolP) + modefreq(data03$F14leisure_Taxi), digits=0)
-data03$leisure_pt <- round(modefreq(data03$F14leisure_Bus) + modefreq(data03$F14leisure_LR) + modefreq(data03$F14leisure_Train), digits=0)
-data03$leisure_bikewalk <- round(modefreq(data03$F14leisure_Bike) + modefreq(data03$F14leisure_Skateboard) + modefreq(data03$F14leisure_Walk), digits=0) 
-data03$leisure_emerging <- round(modefreq(data03$F14leisure_Uber) + modefreq(data03$F14leisure_Carsharing), digits=0)
+data03$leisure_drv <- round(modefreq2(data03$F14leisure_Drivealone) + modefreq2(data03$F14leisure_Moto) + modefreq2(data03$F14leisure_CarpoolD), digits=0) 
+data03$leisure_carpassenger <- round(modefreq2(data03$F14leisure_CarpoolP) + modefreq2(data03$F14leisure_Taxi), digits=0)
+data03$leisure_pt <- round(modefreq2(data03$F14leisure_Bus) + modefreq2(data03$F14leisure_LR) + modefreq2(data03$F14leisure_Train), digits=0)
+data03$leisure_bikewalk <- round(modefreq2(data03$F14leisure_Bike) + modefreq2(data03$F14leisure_Skateboard) + modefreq2(data03$F14leisure_Walk), digits=0) 
+data03$leisure_emerging <- round(modefreq2(data03$F14leisure_Uber) + modefreq2(data03$F14leisure_Carsharing), digits=0)
 data03$leisure_total <- round(
-  modefreq(data03$F14leisure_Drivealone) + modefreq(data03$F14leisure_Moto) + modefreq(data03$F14leisure_CarpoolD)+
-  modefreq(data03$F14leisure_CarpoolP) + modefreq(data03$F14leisure_Taxi)+
-  modefreq(data03$F14leisure_Bus) + modefreq(data03$F14leisure_LR) + modefreq(data03$F14leisure_Train)+
-  modefreq(data03$F14leisure_Bike) + modefreq(data03$F14leisure_Skateboard) + modefreq(data03$F14leisure_Walk)+
-  modefreq(data03$F14leisure_Uber) + modefreq(data03$F14leisure_Carsharing), digits=0) 
+  modefreq2(data03$F14leisure_Drivealone) + modefreq2(data03$F14leisure_Moto)       + modefreq2(data03$F14leisure_CarpoolD) +
+  modefreq2(data03$F14leisure_CarpoolP)   + modefreq2(data03$F14leisure_Taxi)       +
+  modefreq2(data03$F14leisure_Bus)        + modefreq2(data03$F14leisure_LR)         + modefreq2(data03$F14leisure_Train)    +
+  modefreq2(data03$F14leisure_Bike)       + modefreq2(data03$F14leisure_Skateboard) + modefreq2(data03$F14leisure_Walk)     +
+  modefreq2(data03$F14leisure_Uber)       + modefreq2(data03$F14leisure_Carsharing), digits=0) 
 
 data03$PID <- data03[, c(1)]
 data03 <- data03[, c(300, 277:299, 4:6)]
@@ -345,10 +370,25 @@ data11 <- inner_join(data11, data02, by="PID")
 data11 <- inner_join(data11, data05, by="PID") 
 # final sample size 1,069 cases - two cases are excluded b/c they are not in the 1975 sample (PID=9365921, 9369844)
 
-data11 <- data11[, c(1, 19:27, 88, 29:34, 2:18, 56:87, 35:37, 89:97)]
+data11 <- data11[, c(1, 19:27, 54, 29:34, 2:18, 38:53, 35:37, 55:56, 62, 57:61, 63)]
 colnames(data11)
+#sapply(data11[, 2:10], summary)
 
 write.csv(data11, "M:/Millennial_CA/15_MC_multimodality/33_reMplus/data11.csv")
+
+
+
+
+#F. Diagnosis 
+
+# Correlation among BE attributes 
+# source: http://www.sthda.com/english/wiki/correlation-matrix-a-quick-start-guide-to-analyze-format-and-visualize-a-correlation-matrix-using-r-software
+install.packages("PerformanceAnalytics")
+library(PerformanceAnalytics)
+
+data11[, 54:56] %>%
+  chart.Correlation(histogram=TRUE, pch=19)
+
 
 
 
