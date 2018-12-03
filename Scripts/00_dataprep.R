@@ -103,6 +103,47 @@ data01$hhincome <- factor(data01$K17_hhincome, labels=c("Prefer not to answer", 
 data01 <- data01[, c(1, 231:233, 240:243, 245, 244, 237, 235, 246, 70, 71)]
 colnames(data01)
 
+# categorical variables -> a set of binary variables for Mplus 
+colnames(data01)
+data01s <- data01
+
+table(data01s$StudyWorkStatus)
+data01s$FTwork <- ifelse(data01s$StudyWorkStatus=="Full-time work", 1, 0) # Full-time work 
+data01s$PTwork <- ifelse(data01s$StudyWorkStatus=="Part-time work", 1, 0) # Part-time work 
+data01s$FTstudy <- ifelse(data01s$StudyWorkStatus=="Full-time study", 1, 0) # Full-time study
+data01s$PTstudy <- ifelse(data01s$StudyWorkStatus=="Part-time study", 1, 0) # Part-time study
+
+table(data01s$Education)
+data01s$somecoll <- ifelse(data01s$Education=="Some college", 1, 0) 
+data01s$somecoll <- ifelse(data01s$Education=="Associate's degree", 1, data01s$somecoll) 
+data01s$bachelor <- ifelse(data01s$Education=="Bachelor's degree", 1, 0) 
+data01s$graduate <- ifelse(data01s$Education=="Graduate degree", 1, 0) 
+data01s$graduate <- ifelse(data01s$Education=="Professional degree", 1, data01s$graduate) 
+data01s$ednoanswer <- ifelse(data01s$Education=="Prefer not to answer", 1, 0) 
+
+table(data01s$hhincome) #"prefer not to answer" omitted 
+#low:     20k~ 60k 
+#middle:  60k~ 120k 
+#high:   120k~
+
+data01s$lowhhinc <- ifelse(data01s$hhincome=="less than $20,000", 1, 0) 
+data01s$lowhhinc <- ifelse(data01s$hhincome=="$20,001 to $40,000", 1, data01s$lowhhinc) 
+data01s$lowhhinc <- ifelse(data01s$hhincome=="$40,001 to $60,000", 1, data01s$lowhhinc) 
+table(data01s$lowhhinc)
+
+data01s$midhhinc <- ifelse(data01s$hhincome=="$60,001 to $80,000", 1, 0) 
+data01s$midhhinc <- ifelse(data01s$hhincome=="$80,001 to $100,000", 1, data01s$midhhinc) 
+data01s$midhhinc <- ifelse(data01s$hhincome=="$100,001 to $120,000", 1, data01s$midhhinc) 
+table(data01s$midhhinc)
+
+data01s$highhhinc <- ifelse(data01s$hhincome=="$120,001 to $140,000", 1, 0) 
+data01s$highhhinc <- ifelse(data01s$hhincome=="$140,001 to $160,000", 1, data01s$highhhinc) 
+data01s$highhhinc <- ifelse(data01s$hhincome=="More than $160,000", 1, data01s$highhhinc) 
+table(data01s$highhhinc)
+
+data01s <- data01s[, c(1, 5:10, 16:26)]
+colnames(data01s)
+
 
 
 
@@ -217,6 +258,18 @@ data03$PID <- data03[, c(1)]
 data03 <- data03[, c(300, 277:299, 4:6)]
 colnames(data03)
 
+# categorical variables -> a set of binary variables for Mplus 
+data03s <- data03
+
+data03s$withlicense <- ifelse(data03s$license=="With a driver's license", 1, 0)
+data03s$lnCommuteDist <- ifelse(is.na(data03s$CommuteDist)==FALSE, log(data03s$CommuteDist+1), NA)   
+data03s$TeleFreq0 <- ifelse(data03s$TeleFreq==0, 1, 0) # no telecommute
+data03s$TeleFreq1 <- ifelse(data03s$TeleFreq==1, 1, 0) # less than once a week 
+data03s$TeleFreq2 <- ifelse(data03s$TeleFreq==2, 1, 0) # at least once a week 
+
+data03s <- data03s[, c(1, 14:17, 19:23, 29, 11, 30:32, 28, 6, 25:27)]
+colnames(data03s)
+
 
 
 
@@ -263,11 +316,17 @@ filter(data04, is.na(Activity_intensity)==TRUE)
 # the best way is to use the previous data file for the two factors or the three LU attributes. 
 
 
-#use LU attributes from the previous datafile
+# use LU attributes + commute distance variable (lndistance) from the previous datafile 
+# lndistance: probably used Google Maps API for missing cases, but couldn't find intermediate files on 12/03/2018
 data05 <- read.csv("M:/Millennial_CA/15_MC_multimodality/13_analysis/run06/LCA_commuter1071.csv")
 data05$PID <- data05[, 1]
 colnames(data05)
-data05 <- data05[, c(102, 76, 77, 82:86, 91, 74)]
+data05 <- data05[, c(102, 75, 76, 77, 82:86, 91, 74)]
+data05$TQ2 <- ifelse(data05$PID==9836757, 3, data05$TQ2) 
+# missing: mannually scraped on alltransit.cnt.org 
+# revised addresse info come from the two sources (addresses slightly different, but the same location)
+# M:/Millennial_CA/03_task/04_Alltransit/TRscore_full.csv 
+# M:/Millennial_CA/03_task/01_geocoding_recheck/Home_xy_blkgrp_region_02152018.xlsx 
 head(data05)
 
 
@@ -281,9 +340,12 @@ data05 %>%
   summarize(count=n()) %>% 
   filter(count>1)
 
-data11 <- inner_join(data01, data03, by="PID")
+data11 <- inner_join(data01s, data03s, by="PID")
 data11 <- inner_join(data11, data02, by="PID")
 data11 <- inner_join(data11, data05, by="PID") 
 # final sample size 1,069 cases - two cases are excluded b/c they are not in the 1975 sample (PID=9365921, 9369844)
+
+data11 <- data11[, c(1, 19:27, 88, 29:34, 2:18, 38:87, 35:37, 89:97)]
+colnames(data11)
 
 write.csv(data11, "M:/Millennial_CA/15_MC_multimodality/33_reMplus/data11.csv")
