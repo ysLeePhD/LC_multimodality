@@ -345,7 +345,10 @@ data11 <- inner_join(data11, data02, by="PID")
 data11 <- inner_join(data11, data05, by="PID") 
 # final sample size 1,069 cases - two cases are excluded b/c they are not in the 1975 sample (PID=9365921, 9369844)
 
-data11 <- data11[, c(1, 19:27, 88, 29:34, 2:18, 38:87, 35:37, 89:97)]
+data11 <- data11[, c(1, 19:27, 88, 29:34, 2:18, 56:87, 35:37, 89:97)]
 colnames(data11)
 
 write.csv(data11, "M:/Millennial_CA/15_MC_multimodality/33_reMplus/data11.csv")
+
+
+
