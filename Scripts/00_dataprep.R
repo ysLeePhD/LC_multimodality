@@ -190,9 +190,10 @@ table(data03$D10_Telecommute) # 1-No, 2-Not sure, 3-Yes
 table(data03$D11_TelecommuteFreq) # 
 
 data03$TeleFreq <- 0 # no telecommuter (including no commuter)
-data03$TeleFreq <- ifelse(is.na(data03$D11_TelecommuteFreq)==FALSE & data03$D11_TelecommuteFreq==2, 1, data03$TeleFreq) # less than once a week: less than once a month 
-data03$TeleFreq <- ifelse(is.na(data03$D11_TelecommuteFreq)==FALSE & data03$D11_TelecommuteFreq==3, 1, data03$TeleFreq) # less than once a week: 1-3 times a week 
-data03$TeleFreq <- ifelse(is.na(data03$D11_TelecommuteFreq)==FALSE & data03$D11_TelecommuteFreq>3, 2, data03$TeleFreq)  # at least once a week: 1-2, 3-4, & 5 or more times a week 
+data03$TeleFreq <- ifelse(is.na(data03$D11_TelecommuteFreq)==FALSE & data03$D11_TelecommuteFreq==2, 1, data03$TeleFreq) # less than once a month 
+data03$TeleFreq <- ifelse(is.na(data03$D11_TelecommuteFreq)==FALSE & data03$D11_TelecommuteFreq==3, 1, data03$TeleFreq) # 1-3 times a month  
+data03$TeleFreq <- ifelse(is.na(data03$D11_TelecommuteFreq)==FALSE & data03$D11_TelecommuteFreq==4, 1, data03$TeleFreq) # 1-2 times a week   
+data03$TeleFreq <- ifelse(is.na(data03$D11_TelecommuteFreq)==FALSE & data03$D11_TelecommuteFreq>4, 2, data03$TeleFreq)  # 3 + times a week 
 table(data03$TeleFreq)
 
 #if D11_TelecommuteFreq=. then telefreq1=1; 
@@ -348,6 +349,7 @@ data05$PID <- data05[, 1]
 colnames(data05)
 data05 <- data05[, c(102, 75, 76, 77, 82:86, 91, 74)]
 data05$TQ2 <- ifelse(data05$PID==9836757, 3, data05$TQ2) 
+data05$lnTQ2 <- log(data05$TQ2+1) 
 # missing: mannually scraped on alltransit.cnt.org 
 # revised addresse info come from the two sources (addresses slightly different, but the same location)
 # M:/Millennial_CA/03_task/04_Alltransit/TRscore_full.csv 
@@ -370,9 +372,10 @@ data11 <- inner_join(data11, data02, by="PID")
 data11 <- inner_join(data11, data05, by="PID") 
 # final sample size 1,069 cases - two cases are excluded b/c they are not in the 1975 sample (PID=9365921, 9369844)
 
-data11 <- data11[, c(1, 19:27, 54, 29:34, 2:18, 38:53, 35:37, 55:56, 62, 57:61, 63)]
 colnames(data11)
+data11 <- data11[, c(1, 19:27, 54, 29:34, 2:18, 38:53, 35:37, 55:56, 64, 57:61, 63)]
 #sapply(data11[, 2:10], summary)
+colnames(data11)
 
 write.csv(data11, "M:/Millennial_CA/15_MC_multimodality/33_reMplus/data11.csv")
 
@@ -383,12 +386,26 @@ write.csv(data11, "M:/Millennial_CA/15_MC_multimodality/33_reMplus/data11.csv")
 
 # Correlation among BE attributes 
 # source: http://www.sthda.com/english/wiki/correlation-matrix-a-quick-start-guide-to-analyze-format-and-visualize-a-correlation-matrix-using-r-software
-install.packages("PerformanceAnalytics")
+# install.packages("PerformanceAnalytics")
 library(PerformanceAnalytics)
+colnames(data11)
 
-data11[, 54:56] %>%
+data11[, c(54:56)] %>%
   chart.Correlation(histogram=TRUE, pch=19)
 
+data11[, c(54:55, 63)] %>%
+  chart.Correlation(histogram=TRUE, pch=19)
 
+data11[, 17:23] %>%
+  chart.Correlation(histogram=TRUE, pch=19)
+colnames(data11[, 18:23])
 
+data11[, c(24:30, 32:34)] %>%
+  chart.Correlation(histogram=TRUE, pch=19)
 
+# factor scores 
+data11[, c(35, 37, 38, 41:44, 47, 48)] %>%
+  chart.Correlation(histogram=TRUE, pch=19)
+
+a <- sapply(data11[, c(2:61)], sd)
+a[a>2]
