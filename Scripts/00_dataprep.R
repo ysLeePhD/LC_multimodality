@@ -228,15 +228,15 @@ modefreq <- function(x){
   return(a) 
 }
 
-data03$commute_drv <- round(modefreq(data03$F6school_Drivealone) + modefreq(data03$F6school_Moto) + modefreq(data03$F6school_CarpoolD) +  
-  modefreq(data03$F6work_Drivealone) + modefreq(data03$F6work_Moto) + modefreq(data03$F6work_CarpoolD), digits=0)
-data03$commute_carpassenger <- round(modefreq(data03$F6school_CarpoolP) +  modefreq(data03$F6school_Uber) + modefreq(data03$F6school_Taxi) + 
-    modefreq(data03$F6work_CarpoolP) + modefreq(data03$F6work_Uber) + modefreq(data03$F6work_Taxi), digits=0) 
-data03$commute_pt <- round(modefreq(data03$F6school_Shuttle) + modefreq(data03$F6school_Bus) + modefreq(data03$F6school_LR) + modefreq(data03$F6school_Train) + 
-  modefreq(data03$F6work_Shuttle) + modefreq(data03$F6work_Bus) + modefreq(data03$F6work_LR) + modefreq(data03$F6work_Train), digits=0)
-data03$commute_bikewalk <- round(modefreq(data03$F6school_Bike) + modefreq(data03$F6school_Skateboard) + modefreq(data03$F6school_Walk) + 
-  modefreq(data03$F6work_Bike) + modefreq(data03$F6work_Skateboard) + modefreq(data03$F6work_Walk), digits=0)
-data03$commute_total <- round(
+data03$commute_drv <- modefreq(data03$F6school_Drivealone) + modefreq(data03$F6school_Moto) + modefreq(data03$F6school_CarpoolD) +  
+  modefreq(data03$F6work_Drivealone) + modefreq(data03$F6work_Moto) + modefreq(data03$F6work_CarpoolD) 
+data03$commute_carpassenger <- modefreq(data03$F6school_CarpoolP) +  modefreq(data03$F6school_Uber) + modefreq(data03$F6school_Taxi) + 
+    modefreq(data03$F6work_CarpoolP) + modefreq(data03$F6work_Uber) + modefreq(data03$F6work_Taxi) 
+data03$commute_pt <- modefreq(data03$F6school_Shuttle) + modefreq(data03$F6school_Bus) + modefreq(data03$F6school_LR) + modefreq(data03$F6school_Train) + 
+  modefreq(data03$F6work_Shuttle) + modefreq(data03$F6work_Bus) + modefreq(data03$F6work_LR) + modefreq(data03$F6work_Train)
+data03$commute_bikewalk <- modefreq(data03$F6school_Bike) + modefreq(data03$F6school_Skateboard) + modefreq(data03$F6school_Walk) + 
+  modefreq(data03$F6work_Bike) + modefreq(data03$F6work_Skateboard) + modefreq(data03$F6work_Walk)
+data03$commute_total <- 
   modefreq(data03$F6school_Drivealone) + modefreq(data03$F6school_Moto) + modefreq(data03$F6school_CarpoolD)+  
   modefreq(data03$F6work_Drivealone) + modefreq(data03$F6work_Moto) + modefreq(data03$F6work_CarpoolD)+
   modefreq(data03$F6school_CarpoolP) +  modefreq(data03$F6school_Uber) + modefreq(data03$F6school_Taxi)+ 
@@ -244,7 +244,7 @@ data03$commute_total <- round(
   modefreq(data03$F6school_Shuttle) + modefreq(data03$F6school_Bus) + modefreq(data03$F6school_LR) + modefreq(data03$F6school_Train)+ 
   modefreq(data03$F6work_Shuttle) + modefreq(data03$F6work_Bus) + modefreq(data03$F6work_LR) + modefreq(data03$F6work_Train)+
   modefreq(data03$F6school_Bike) + modefreq(data03$F6school_Skateboard) + modefreq(data03$F6school_Walk)+ 
-  modefreq(data03$F6work_Bike) + modefreq(data03$F6work_Skateboard) + modefreq(data03$F6work_Walk), digits=0)
+  modefreq(data03$F6work_Bike) + modefreq(data03$F6work_Skateboard) + modefreq(data03$F6work_Walk) 
 
 modefreq2 <- function(x){
   a <- NA 
@@ -268,17 +268,17 @@ modefreq2 <- function(x){
   return(a) 
 }
   
-data03$leisure_drv <- round(modefreq2(data03$F14leisure_Drivealone) + modefreq2(data03$F14leisure_Moto) + modefreq2(data03$F14leisure_CarpoolD), digits=0) 
-data03$leisure_carpassenger <- round(modefreq2(data03$F14leisure_CarpoolP) + modefreq2(data03$F14leisure_Taxi), digits=0)
-data03$leisure_pt <- round(modefreq2(data03$F14leisure_Bus) + modefreq2(data03$F14leisure_LR) + modefreq2(data03$F14leisure_Train), digits=0)
-data03$leisure_bikewalk <- round(modefreq2(data03$F14leisure_Bike) + modefreq2(data03$F14leisure_Skateboard) + modefreq2(data03$F14leisure_Walk), digits=0) 
-data03$leisure_emerging <- round(modefreq2(data03$F14leisure_Uber) + modefreq2(data03$F14leisure_Carsharing), digits=0)
-data03$leisure_total <- round(
+data03$leisure_drv <- modefreq2(data03$F14leisure_Drivealone) + modefreq2(data03$F14leisure_Moto) + modefreq2(data03$F14leisure_CarpoolD)  
+data03$leisure_carpassenger <- modefreq2(data03$F14leisure_CarpoolP) + modefreq2(data03$F14leisure_Taxi) 
+data03$leisure_pt <- modefreq2(data03$F14leisure_Bus) + modefreq2(data03$F14leisure_LR) + modefreq2(data03$F14leisure_Train) 
+data03$leisure_bikewalk <- modefreq2(data03$F14leisure_Bike) + modefreq2(data03$F14leisure_Skateboard) + modefreq2(data03$F14leisure_Walk) 
+data03$leisure_emerging <- modefreq2(data03$F14leisure_Uber) + modefreq2(data03$F14leisure_Carsharing) 
+data03$leisure_total <-  
   modefreq2(data03$F14leisure_Drivealone) + modefreq2(data03$F14leisure_Moto)       + modefreq2(data03$F14leisure_CarpoolD) +
   modefreq2(data03$F14leisure_CarpoolP)   + modefreq2(data03$F14leisure_Taxi)       +
   modefreq2(data03$F14leisure_Bus)        + modefreq2(data03$F14leisure_LR)         + modefreq2(data03$F14leisure_Train)    +
   modefreq2(data03$F14leisure_Bike)       + modefreq2(data03$F14leisure_Skateboard) + modefreq2(data03$F14leisure_Walk)     +
-  modefreq2(data03$F14leisure_Uber)       + modefreq2(data03$F14leisure_Carsharing), digits=0) 
+  modefreq2(data03$F14leisure_Uber)       + modefreq2(data03$F14leisure_Carsharing) 
 
 data03$PID <- data03[, c(1)]
 data03 <- data03[, c(300, 277:299, 4:6)]
@@ -384,6 +384,10 @@ write.csv(data11, "M:/Millennial_CA/15_MC_multimodality/33_reMplus/data11.csv")
 
 #F. Diagnosis 
 
+a <- sapply(data11[, c(10:61)], sd)
+a[a < mean(a)-sd(a)]
+a[a > mean(a)+sd(a)]
+
 # Correlation among BE attributes 
 # source: http://www.sthda.com/english/wiki/correlation-matrix-a-quick-start-guide-to-analyze-format-and-visualize-a-correlation-matrix-using-r-software
 # install.packages("PerformanceAnalytics")
@@ -407,5 +411,3 @@ data11[, c(24:30, 32:34)] %>%
 data11[, c(35, 37, 38, 41:44, 47, 48)] %>%
   chart.Correlation(histogram=TRUE, pch=19)
 
-a <- sapply(data11[, c(2:61)], sd)
-a[a>2]
