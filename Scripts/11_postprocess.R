@@ -113,8 +113,8 @@ library(Matrix)
 library(survival)
 library(survey)
 
-xvars <- c(#"commute_drv", "commute_carpassenger", "commute_pt", "commute_bikewalk", 
-           #"leisure_drv", "leisure_carpassenger", "leisure_pt", "leisure_bikewalk", "leisure_emerging", 
+xvars <- c("commute_drv", "commute_carpassenger", "commute_pt", "commute_bikewalk", 
+           "leisure_drv", "leisure_carpassenger", "leisure_pt", "leisure_bikewalk", "leisure_emerging", 
            "cdaypw", "ComDist", "TeleFreq", "withlicense", "carpadlt", 
            "HHSize", "withParent", "withPartner", "withOwnChild", "withChild", "nchild", 
            "WorkStudyStat", "Education", "HHincome", 
@@ -129,4 +129,3 @@ xvars <- c(#"commute_drv", "commute_carpassenger", "commute_pt", "commute_bikewa
 
 wt.table1 <- svydesign(ids = ~1, data = stat06, weights = ~wprob)
 wt.table2 <- svyCreateTableOne(vars= xvars, strata = "class", data=wt.table1)
-print(wt.table2)
