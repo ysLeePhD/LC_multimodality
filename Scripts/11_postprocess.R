@@ -2,7 +2,15 @@
 
 library(tidyverse) 
 
+
+#1. read the result of the latent class mplus model    
+
 stat00 <- read.csv("M:/Millennial_CA/15_MC_multimodality/33_reMplus/run32_results.csv")
+
+
+
+#2. create new categorical variables 
+#   also, reverse the log-transformation of commute distance and transit quality measure
 
 stat00$wprob1 <- stat00$prob1*stat00$wt 
 stat00$wprob2 <- stat00$prob2*stat00$wt 
@@ -76,6 +84,10 @@ table(stat02$NHtype)
 stat02$ComDist <- exp(stat02$lndistance)-1
 stat02$TQ2 <- exp(stat02$lnTQ2)-1
 
+
+
+#3. create a long-formed table to compute weighted summary statistics 
+
 length(colnames(stat02))
 stat03a <- stat02[stat02$wprob1>0, c(1, 2, 6:length(colnames(stat02)))]
 stat03a$wprob <- stat03a$wprob1  
@@ -106,7 +118,6 @@ stat05 <- merge(stat04, data03[, c(1, 9, 7, 10)], by="PID")
 stat06 <- merge(stat05, data01[, c(1, 14, 15)], by="PID")
 stat06$Millennials <- ifelse(stat06$Millennials==2, 0, stat06$Millennials)
 
-
 library(tableone)
 library(grid) 
 library(Matrix)
@@ -129,3 +140,66 @@ xvars <- c("commute_drv", "commute_carpassenger", "commute_pt", "commute_bikewal
 
 wt.table1 <- svydesign(ids = ~1, data = stat06, weights = ~wprob)
 wt.table2 <- svyCreateTableOne(vars= xvars, strata = "class", data=wt.table1)
+print(wt.table2)
+
+
+
+#4. create a chart showing the shares of four classes by age 
+
+colnames(stat02)
+stat11 <- merge(stat02, data01[, c(1, 14, 15)], by="PID")
+colnames(stat11)
+
+# revise age 17 -> 18 and 51 -> 50 
+stat11$Ager <- stat11$Age
+stat11$Ager <- ifelse(stat11$Age==17, 18, stat11$Ager)
+stat11$Ager <- ifelse(stat11$Age==51, 50, stat11$Ager)
+
+pct_class_by_group <- data.frame(
+  AgeNHgroup = "certain group", 
+  MultimodalClass = rep(c("Monomodal driver","Carpooler", "Active traveler", "Transit rider"), 34), 
+  # 18-22 to 46-50 (29 groups) + NHtype (5 groups) 
+  WtProbSum = abs(rnorm(136, 0, 1)), 
+  stringsAsFactors = FALSE)
+head(pct_class_by_group)
+sapply(pct_class_by_group, class)
+
+
+for (i in 1:29) {
+  temp00 <- stat11[stat11$Age>=i+17 & stat11$Age<i+22, ]
+  a <- 4*(i-1)+1  
+  b <- 4*i  
+  pct_class_by_group[a:b, 1] <- paste0(as.character(i+17), "~", as.character(i+21)) 
+  pct_class_by_group[a, 3]   <- sum(temp00[, 5])/sum(temp00[, 2:5]) 
+  pct_class_by_group[a+1, 3] <- sum(temp00[, 3])/sum(temp00[, 2:5]) 
+  pct_class_by_group[a+2, 3] <- sum(temp00[, 2])/sum(temp00[, 2:5])
+  pct_class_by_group[a+3, 3] <- sum(temp00[, 4])/sum(temp00[, 2:5]) 
+}
+
+library(RColorBrewer)
+
+# https://www.r-graph-gallery.com/48-grouped-barplot-with-ggplot2/
+# https://stackoverflow.com/questions/32345923/how-to-control-ordering-of-stacked-bar-chart-using-identity-on-ggplot2
+# https://stackoverflow.com/questions/3606697/how-to-set-limits-for-axes-in-ggplot2-r-plots
+# https://stackoverflow.com/questions/14622421/how-to-change-legend-title-in-ggplot
+# http://www.sthda.com/english/wiki/ggplot2-legend-easy-steps-to-change-the-position-and-the-appearance-of-a-graph-legend-in-r-software
+# https://stackoverflow.com/questions/1330989/rotating-and-spacing-axis-labels-in-ggplot2
+# http://www.sthda.com/english/wiki/ggplot2-colors-how-to-change-colors-automatically-and-manually
+# https://stackoverflow.com/questions/8750871/ggplot2-reverse-order-of-scale-brewer
+
+ggplot(pct_class_by_group[1:116, ], 
+       aes(
+         fill=factor(MultimodalClass, levels=c("Transit rider",  "Active traveler", "Carpooler","Monomodal driver")), 
+         y=WtProbSum, x=AgeNHgroup)
+       ) +
+  geom_bar( stat="identity", position="fill") + 
+  coord_cartesian(ylim=c(0.75, 1)) + 
+  guides(fill=guide_legend(title="")) + 
+  theme(legend.position="bottom") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+  scale_colour_brewer(palette="BuPu", direction=-1) # not solved yet. 
+  
+
+
+
+
