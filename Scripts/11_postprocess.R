@@ -117,6 +117,9 @@ colnames(stat04)
 stat05 <- merge(stat04, data03[, c(1, 9, 7, 10)], by="PID")
 stat06 <- merge(stat05, data01[, c(1, 14, 15)], by="PID")
 stat06$Millennials <- ifelse(stat06$Millennials==2, 0, stat06$Millennials)
+stat06$commute_total <- stat06$commute_drv + stat06$commute_carpassenger + stat06$commute_pt + stat06$commute_bikewalk 
+stat06$leisure_total <- stat06$leisure_drv + stat06$leisure_carpassenger + stat06$leisure_pt + stat06$leisure_bikewalk + 
+  stat06$leisure_emerging
 
 library(tableone)
 library(grid) 
@@ -124,8 +127,8 @@ library(Matrix)
 library(survival)
 library(survey)
 
-xvars <- c("commute_drv", "commute_carpassenger", "commute_pt", "commute_bikewalk", 
-           "leisure_drv", "leisure_carpassenger", "leisure_pt", "leisure_bikewalk", "leisure_emerging", 
+xvars <- c("commute_drv", "commute_carpassenger", "commute_pt", "commute_bikewalk", "commute_total",
+           "leisure_drv", "leisure_carpassenger", "leisure_pt", "leisure_bikewalk", "leisure_emerging", "leisure_total",
            "cdaypw", "ComDist", "TeleFreq", "withlicense", "carpadlt", 
            "HHSize", "withParent", "withPartner", "withOwnChild", "withChild", "nchild", 
            "WorkStudyStat", "Education", "HHincome", 
@@ -140,8 +143,8 @@ xvars <- c("commute_drv", "commute_carpassenger", "commute_pt", "commute_bikewal
 
 wt.table1 <- svydesign(ids = ~1, data = stat06, weights = ~wprob)
 wt.table2 <- svyCreateTableOne(vars= xvars, strata = "class", data=wt.table1)
-print(wt.table2)
-
+# https://www.rdocumentation.org/packages/tableone/versions/0.9.3/topics/svyCreateTableOne
+print(wt.table2, contDigits = 3, catDigits = 3)
 
 
 #4. create a chart showing the shares of four classes by age 
@@ -176,6 +179,27 @@ for (i in 1:29) {
   pct_class_by_group[a+3, 3] <- sum(temp00[, 4])/sum(temp00[, 2:5]) 
 }
 
+NHtypeList <- c("Central city", "Urban", "Suburban", "Rural in urban", "Rural")
+
+for (i in 1:5) {
+  temp00 <- stat11[stat11$NHtype == NHtypeList[i], ]
+  a <- 4*(i+28)+1  
+  b <- 4*(i+29)  
+  pct_class_by_group[a:b, 1] <- NHtypeList[i]
+  pct_class_by_group[a, 3]   <- sum(temp00[, 5])/sum(temp00[, 2:5]) 
+  pct_class_by_group[a+1, 3] <- sum(temp00[, 3])/sum(temp00[, 2:5]) 
+  pct_class_by_group[a+2, 3] <- sum(temp00[, 2])/sum(temp00[, 2:5])
+  pct_class_by_group[a+3, 3] <- sum(temp00[, 4])/sum(temp00[, 2:5]) 
+}
+
+pct_class_by_group$label1 <- paste(round(pct_class_by_group$WtProbSum*100, digits=1), "%")
+pct_class_by_group$label1 <- ifelse(pct_class_by_group$MultimodalClass=="Monomodal driver", "", pct_class_by_group$label1)
+pct_class_by_group
+
+pct_class_by_group$label2 <- paste(round(pct_class_by_group$WtProbSum*100, digits=1), "%")
+pct_class_by_group$label2 <- ifelse(pct_class_by_group$MultimodalClass !="Monomodal driver", "", pct_class_by_group$label2)
+pct_class_by_group
+
 library(RColorBrewer)
 
 # https://www.r-graph-gallery.com/48-grouped-barplot-with-ggplot2/
@@ -186,20 +210,42 @@ library(RColorBrewer)
 # https://stackoverflow.com/questions/1330989/rotating-and-spacing-axis-labels-in-ggplot2
 # http://www.sthda.com/english/wiki/ggplot2-colors-how-to-change-colors-automatically-and-manually
 # https://stackoverflow.com/questions/8750871/ggplot2-reverse-order-of-scale-brewer
+# https://ggplot2.tidyverse.org/reference/geom_text.html
+# https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
 
-ggplot(pct_class_by_group[1:116, ], 
-       aes(
-         fill=factor(MultimodalClass, levels=c("Transit rider",  "Active traveler", "Carpooler","Monomodal driver")), 
-         y=WtProbSum, x=AgeNHgroup)
-       ) +
-  geom_bar( stat="identity", position="fill") + 
-  coord_cartesian(ylim=c(0.75, 1)) + 
+ggplot(
+  pct_class_by_group[1:116, ], 
+  aes(
+  fill=factor(MultimodalClass, levels=c("Transit rider",  "Active traveler", "Carpooler","Monomodal driver")), 
+  y=WtProbSum, 
+  x=factor(AgeNHgroup, 
+           levels=c(
+           "18~22", "19~23", "20~24", "21~25", "22~26", "23~27", "24~28", "25~29",  
+           "26~30", "27~31", "28~32", "29~33", "30~34", "31~35", "32~36", "33~37", 
+           "34~38", "35~39", "36~40", "37~41", "38~42", "39~43", "40~44", "41~45",  
+           "42~46", "43~47", "44~48", "45~49", "46~50", 
+           "Central city", "Urban", "Suburban", "Rural in urban", "Rural")))) +
+  geom_bar(stat="identity", position="fill") + 
+  coord_cartesian(ylim=c(0.7, 1)) + 
   guides(fill=guide_legend(title="")) + 
+  ylab("") + 
+  xlab("") + 
   theme(legend.position="bottom") + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
-  scale_colour_brewer(palette="BuPu", direction=-1) # not solved yet. 
-  
+  scale_colour_brewer(palette="RdBu", direction=-1) + # not solved yet. 
+  geom_text(aes(label=label1), position=position_stack(vjust=0.5), size=3.5, angle=90)+ 
+  geom_text(aes(label=label2), position=position_stack(vjust=0.95), size=3.5, angle=90) 
+  # colour="white", , fontface = "bold") +
 
+# https://ggplot2.tidyverse.org/reference/ggsave.html
+ggsave(file="M:/Millennial_CA/15_MC_multimodality/31_LC_multimodality/Rplot.jpeg", 
+       units=c("in"), dpi=300)
+
+#theme_classic()+   # remove the backgroud grey
+# add millennials, gen Xers, and by neighborhood type 
+# x/y axis labels
+# reorder the legend 
+# check if okay in b/w 
 
 
 
