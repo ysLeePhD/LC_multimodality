@@ -1,9 +1,12 @@
 
 
+install.packages("tidyverse", dependencies =  TRUE)
+install.packages("RColorBrew", dependencies =  TRUE)
 install.packages("Hmisc", dependencies = TRUE) # Help generate weighted summary 
 install.packages("spatstat", dependencies = TRUE) # weighted.median
 
 library(tidyverse) 
+library(RColorBrewer)
 
 library(lattice)
 library(survival)
@@ -200,27 +203,33 @@ rownames(all) <- NULL
 colnames(all) <- c("Active traveler", "Carpooler", "Transit rider", "Driver")
 all$scenario <- c("Millennials (now)", "Access to Cars", "Work & Child", "Attitudes", 
                   "Mode-Perception", "Relocation", "All changes", "Gen Xers (now)")
-all 
-
 all2 <- all %>% 
   gather(`Active traveler`, `Carpooler`, `Transit rider`, `Driver`, key = "class", value = "share") 
-
 all2$class <- factor(all2$class,
-                     levels = c("Active traveler", "Transit rider", "Carpooler", "Driver"), 
+                     levels = c("Transit rider", "Active traveler", "Carpooler", "Driver"), 
                      ordered = TRUE)
-
 all2$scenario <- factor(all2$scenario, 
                         levels = c("Millennials (now)", "Access to Cars", "Work & Child", "Attitudes", 
                                    "Mode-Perception", "Relocation", "All changes", "Gen Xers (now)"), 
                         ordered = TRUE)
-all2$pct1 <- ifelse(all2$class != "Driver", paste(as.character(round(all2$share*100, 1)), "%", " "), "")
-all2$pct2 <- ifelse(all2$class == "Driver", paste(as.character(round(all2$share*100, 1)), "%", " "), "")
+all2$pct1 <- ifelse(all2$class == "Driver", paste(as.character(round(all2$share*100, 1)), "%", " "), "")
+all2$pct2 <- ifelse(all2$class == "Carpooler", paste(as.character(round(all2$share*100, 1)), "%", " "), "")
+all2$pct3 <- ifelse(all2$class == "Active traveler", paste(as.character(round(all2$share*100, 1)), "%", " "), "")
+all2$pct4 <- ifelse(all2$class == "Transit rider", paste(as.character(round(all2$share*100, 1)), "%", " "), "")
+
+all2
 
 ggplot(data = all2, aes(x = scenario, y = share)) + 
-  geom_bar(aes(fill = class), stat = "identity") + 
-  coord_cartesian(ylim = c(0.8, 1)) + 
-  guides(fill=guide_legend(title="")) + 
-  geom_text(size = 3.5, hjust=0.35, vjust=2, aes(label = pct2, fontface=1)) + # 2(bold), 3(italic), 4(bold.italic)
+  geom_bar(aes(fill = class), stat = "identity", position = "fill") + #position="fill" each stacked bar the same height
+  coord_cartesian(ylim = c(0.7, 1)) + 
+  scale_fill_brewer(palette = "YlGnBu", direction=1) + 
+  guides(fill=guide_legend(title="", reverse = TRUE)) + 
+  theme_classic() + 
+  theme(legend.position="bottom", 
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-20,0,00,0)) + 
+  geom_text(size = 3.5, hjust=0.35, vjust=2, color = "white", aes(label = pct1, fontface=1)) + # 2(bold), 3(italic), 4(bold.italic)
+  #geom_text(size = 3.5, position=position_stack(vjust = 5), aes(label = pct2, fontface=1)) + # 2(bold), 3(italic), 4(bold.italic)
   scale_y_continuous(labels=scales::percent) + #https://sebastiansauer.github.io/percentage_plot_ggplot2_V2/
   ylab("") + 
   xlab("") 

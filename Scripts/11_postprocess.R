@@ -1,11 +1,34 @@
 
+install.packages("tidyverse", dependencies =  TRUE)
+install.packages("RColorBrew", dependencies =  TRUE)
+
+install.packages("tableone", dependencies = TRUE)
+#install.packages("Matrix", dependencies = TRUE)
+install.packages("survival", dependencies = TRUE)
+install.packages("survey", dependencies = TRUE)
 
 library(tidyverse) 
+library(RColorBrewer)
+
+library(tableone)
+library(grid) 
+library(Matrix)
+library(survival)
+
+library(bit)
+library(bit64)
+library(blob)
+library(mitools)
+library(RSQLite)
+library(RODBC)
+library(CompQuadForm)
+library(survey)
 
 
 #1. read the result of the latent class mplus model    
 
 stat00 <- read.csv("M:/Millennial_CA/15_MC_multimodality/33_reMplus/run32_results.csv")
+data11 <- read.csv("M:/Millennial_CA/15_MC_multimodality/33_reMplus/data11.csv")
 
 
 
@@ -121,12 +144,6 @@ stat06$commute_total <- stat06$commute_drv + stat06$commute_carpassenger + stat0
 stat06$leisure_total <- stat06$leisure_drv + stat06$leisure_carpassenger + stat06$leisure_pt + stat06$leisure_bikewalk + 
   stat06$leisure_emerging
 
-library(tableone)
-library(grid) 
-library(Matrix)
-library(survival)
-library(survey)
-
 xvars <- c("commute_drv", "commute_carpassenger", "commute_pt", "commute_bikewalk", "commute_total",
            "leisure_drv", "leisure_carpassenger", "leisure_pt", "leisure_bikewalk", "leisure_emerging", "leisure_total",
            "cdaypw", "ComDist", "TeleFreq", "withlicense", "carpadlt", 
@@ -145,6 +162,7 @@ wt.table1 <- svydesign(ids = ~1, data = stat06, weights = ~wprob)
 wt.table2 <- svyCreateTableOne(vars= xvars, strata = "class", data=wt.table1)
 # https://www.rdocumentation.org/packages/tableone/versions/0.9.3/topics/svyCreateTableOne
 print(wt.table2, contDigits = 3, catDigits = 3)
+
 
 
 #4. create a chart showing the shares of four classes by age 
@@ -200,7 +218,7 @@ pct_class_by_group$label2 <- paste(round(pct_class_by_group$WtProbSum*100, digit
 pct_class_by_group$label2 <- ifelse(pct_class_by_group$MultimodalClass !="Monomodal driver", "", pct_class_by_group$label2)
 pct_class_by_group
 
-library(RColorBrewer)
+
 
 # https://www.r-graph-gallery.com/48-grouped-barplot-with-ggplot2/
 # https://stackoverflow.com/questions/32345923/how-to-control-ordering-of-stacked-bar-chart-using-identity-on-ggplot2
@@ -213,32 +231,38 @@ library(RColorBrewer)
 # https://ggplot2.tidyverse.org/reference/geom_text.html
 # https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
 
-ggplot(
-  pct_class_by_group[1:116, ], 
-  aes(
-  fill=factor(MultimodalClass, levels=c("Transit rider",  "Active traveler", "Carpooler","Monomodal driver")), 
-  y=WtProbSum, 
-  x=factor(AgeNHgroup, 
-           levels=c(
-           "18~22", "19~23", "20~24", "21~25", "22~26", "23~27", "24~28", "25~29",  
-           "26~30", "27~31", "28~32", "29~33", "30~34", "31~35", "32~36", "33~37", 
-           "34~38", "35~39", "36~40", "37~41", "38~42", "39~43", "40~44", "41~45",  
-           "42~46", "43~47", "44~48", "45~49", "46~50", 
-           "Central city", "Urban", "Suburban", "Rural in urban", "Rural")))) +
+ggplot(pct_class_by_group[1:116, ], 
+       aes(
+         x=factor(AgeNHgroup,
+                  levels=c("18~22", "19~23", "20~24", "21~25", "22~26", "23~27", "24~28", "25~29",
+                           "26~30", "27~31", "28~32", "29~33", "30~34", "31~35", "32~36", "33~37",
+                           "34~38", "35~39", "36~40", "37~41", "38~42", "39~43", "40~44", "41~45",
+                           "42~46", "43~47", "44~48", "45~49", "46~50", 
+                           "Central city", "Urban", "Suburban", "Rural in urban", "Rural")), 
+         y=WtProbSum,
+         fill=factor(MultimodalClass, 
+                     levels=c("Transit rider",  "Active traveler", "Carpooler","Monomodal driver")),
+         color=factor(MultimodalClass, 
+                      levels=c("Transit rider",  "Active traveler", "Carpooler","Monomodal driver"))
+         )) +
   geom_bar(stat="identity", position="fill") + 
   coord_cartesian(ylim=c(0.7, 1)) + 
-  guides(fill=guide_legend(title="")) + 
+  guides(fill=guide_legend(title="", reverse = TRUE)) + 
+  guides(color=FALSE) + 
   ylab("") + 
   xlab("") + 
-  theme(legend.position="bottom") + 
+  theme_classic() + 
+  theme(legend.position="bottom", 
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-20,0,00,0)) + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
-  scale_colour_brewer(palette="RdBu", direction=-1) + # not solved yet. 
-  geom_text(aes(label=label1), position=position_stack(vjust=0.5), size=3.5, angle=90)+ 
-  geom_text(aes(label=label2), position=position_stack(vjust=0.95), size=3.5, angle=90) 
-  # colour="white", , fontface = "bold") +
+  scale_fill_brewer(palette = "YlGnBu", direction=1) + #scale_color_brewer(palette = "YlGnBu", direction=1) +  
+  scale_colour_manual(values = c("white", "white", "white", "white")) + 
+  geom_text(aes(label=label1), color = "black", position=position_stack(vjust=0.5), size=3.5, angle=90)+ 
+  geom_text(aes(label=label2), color = "white", position=position_stack(vjust=0.95), size=3.5, angle=90) # colour="white", , fontface = "bold") +
 
 # https://ggplot2.tidyverse.org/reference/ggsave.html
-ggsave(file="M:/Millennial_CA/15_MC_multimodality/31_LC_multimodality/Rplot.jpeg", 
+ggsave(file="C:/Users/ylee366/Dropbox (GaTech)/3a_ResearchCEE/02_Transp_LCA_multimodal/lca_by_age.jpg", 
        units=c("in"), dpi=300)
 
 #theme_classic()+   # remove the backgroud grey
