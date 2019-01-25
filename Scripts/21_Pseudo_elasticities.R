@@ -28,6 +28,60 @@ coef_varlist <- c("t1", "t2", "t4", "t5", "t6", "t7",
                   "prob1", "prob2", "prob3", "prob4", "class", "wt", "id")
 stat30 <- stat00[, coef_varlist] 
 
+#------------------------------------------------------------------------------------------------------------
+# 1/25/2019 (Friday)
+# 
+# After discussion with Pat on 1/24/2019, we changed the approach to examine which covariate is more important 
+# in the class membership model, regarding the magnitude of the coefficient. 
+#
+# Here is the basic idea of the new approach: We compute a **unique** contribution of each covariate 
+# to an individual's utility (an imaginary individual with the mean value for the covariate). 
+#
+# (unique contribution to utility) 
+# = (unstandardized beta of a covariate ) * (s.d. of the covariate in the sample) 
+#
+# Mathematically it is the same as the standardized coefficient of the covariate. 
+#
+# In response, a table of a new class membership model will be inclused as an appendix table, 
+# and a paragraph dicussing patterns in the table is added in the dicussion section. 
+#
+# Below follows new scripts for our new approach, and the previous scripts follow them from #A.  
+#------------------------------------------------------------------------------------------------------------
+
+colnames(stat30)
+
+wtd_var <- rep(0, 20)
+  
+wtd_var[1] <- wtd.var(stat30$t1, w = stat30$wt)
+wtd_var[2] <- wtd.var(stat30$t2, w = stat30$wt)
+wtd_var[3] <- wtd.var(stat30$t4, w = stat30$wt)
+wtd_var[4] <- wtd.var(stat30$t5, w = stat30$wt)
+wtd_var[5] <- wtd.var(stat30$t6, w = stat30$wt)
+wtd_var[6] <- wtd.var(stat30$t7, w = stat30$wt)
+
+wtd_var[7] <- wtd.var(stat30$hh4, w = stat30$wt)
+wtd_var[8] <- wtd.var(stat30$p3, w = stat30$wt)
+wtd_var[9] <- wtd.var(stat30$p4, w = stat30$wt)
+wtd_var[10] <- wtd.var(stat30$p5, w = stat30$wt)
+wtd_var[11] <- wtd.var(stat30$p6, w = stat30$wt)
+wtd_var[12] <- wtd.var(stat30$p7, w = stat30$wt)
+
+wtd_var[13] <- wtd.var(stat30$at4, w = stat30$wt)
+wtd_var[14] <- wtd.var(stat30$at8, w = stat30$wt)
+wtd_var[15] <- wtd.var(stat30$at9, w = stat30$wt)
+wtd_var[16] <- wtd.var(stat30$at10, w = stat30$wt)
+
+wtd_var[17] <- wtd.var(stat30$at17, w = stat30$wt)
+wtd_var[18] <- wtd.var(stat30$at18, w = stat30$wt)
+wtd_var[19] <- wtd.var(stat30$at19, w = stat30$wt)
+
+wtd_var[20] <- wtd.var(stat30$be1, w = stat30$wt)
+
+write.csv(wtd_var, file = "M:/Millennial_CA/15_MC_multimodality/33_reMplus/wtd_var.csv")
+
+
+# A. Make data ready for further processing: join age & define a function calculating the share of four classes 
+
 data00 <- read.csv(file="M:/Millennial_CA/02_raw_data/11_latest_update/GenY_Syntax6_Step1_temp.csv")
 data01 <- data00[, c(1, 114:120, 123:138, 599:643, 799, 801, 420, 426, 468, 181:334, 674:675)]
 data01a <- data01[, c(1, 70)]
@@ -75,7 +129,7 @@ scenario1 <- latent.class.share(stat32, n=591) # Active traveler, Carpooler, Tra
 scenario1b <- latent.class.share(stat32b, n=478) 
 
 
-# A. Test hypothetical scenarios - improving access to cars 
+# B. Test hypothetical scenarios - improving access to cars 
 
 wtd.mean(stat32$t6, w = stat32$wt) # has a drivers' license 
 wtd.mean(stat32$t7, w = stat32$wt) # cars per adult in the household 
@@ -96,7 +150,7 @@ wtd.mean(stat33$t7, w = stat33$wt)
 scenario2 <- latent.class.share(stat33, n=591) # Active traveler, Carpooler, Transit rider, & Driver 
 
 
-# B. Test hypothetical scenarios - finish studying & living with a child
+# C. Test hypothetical scenarios - finish studying & living with a child
 
 wtd.mean(stat32$hh4, w = stat32$wt) # living with own children 
 wtd.mean(stat32$p3, w = stat32$wt) # full-time students 
@@ -122,7 +176,7 @@ wtd.mean(stat34$p4, w = stat34$wt)
 scenario3 <- latent.class.share(stat34, n=591) # Active traveler, Carpooler, Transit rider, & Driver 
 
 
-# C. Test hypothetical scenarios - attitudes towards cars, environ policies and time/mode constraints
+# D. Test hypothetical scenarios - attitudes towards cars, environ policies and time/mode constraints
 
 at.factor <- -1 # cancel out the difference between millennials & Gen Xers  
 #at.factor <- 1 # strengthen the difference between millennials & Gen Xers  
@@ -144,7 +198,7 @@ stat35$at9 <- stat35$at9 + at.factor*at9diff # at9 - time/mode constrained
 scenario4 <- latent.class.share(stat35, n=591) # Active traveler, Carpooler, Transit rider, & Driver 
 
 
-# D. Test hypothetical scenarios - mode-specific perceptions 
+# E. Test hypothetical scenarios - mode-specific perceptions 
 
 at17diff <- wtd.mean(stat32$at17, w = stat32$wt) - wtd.mean(stat32b$at17, w = stat32b$wt)
 at18diff <- wtd.mean(stat32$at18, w = stat32$wt) - wtd.mean(stat32b$at18, w = stat32b$wt)
@@ -159,7 +213,7 @@ stat36$at19 <- stat36$at19 + at.factor*at19diff # at19 - overall active modes
 scenario5 <- latent.class.share(stat36, n=591) # Active traveler, Carpooler, Transit rider, & Driver 
 
 
-# E. Test hypothetical scenarios - relocation to suburbs
+# F. Test hypothetical scenarios - relocation to suburbs
 
 be.factor <- -1 
 
@@ -172,7 +226,7 @@ stat37$be1 <- stat37$be1 + be.factor*be1diff #be.factor*be1diff
 scenario6 <- latent.class.share(stat37, n=591) # Active traveler, Carpooler, Transit rider, & Driver 
 
 
-# F. Test hypothetical scenarios - all changes  
+# G. Test hypothetical scenarios - all changes  
 
 stat38 <- stat32 
 
@@ -195,7 +249,7 @@ stat38$be1 <- stat37$be1
 
 scenario7 <- latent.class.share(stat38, n=591) # Active traveler, Carpooler, Transit rider, & Driver 
 
-# Plot a bar chart 
+# H. Plot & save bar charts (Be careful not to overwrite)
 
 all <- as.data.frame(rbind(scenario1, scenario2, scenario3, scenario4, 
                            scenario5, scenario6, scenario7, scenario1b))
@@ -234,4 +288,4 @@ ggplot(data = all2, aes(x = scenario, y = share)) +
   ylab("") + 
   xlab("") 
 
-ggsave("C:/Users/ylee366/Dropbox (GaTech)/3a_ResearchCEE/02_Transp_LCA_multimodal/lca_scenarios.jpg", dpi=300)
+#ggsave("C:/Users/ylee366/Dropbox (GaTech)/3a_ResearchCEE/02_Transp_LCA_multimodal/lca_scenarios.jpg", dpi=300)
